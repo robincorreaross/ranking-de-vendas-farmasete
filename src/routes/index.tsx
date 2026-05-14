@@ -6,11 +6,13 @@ import { EmployeeForm } from "@/components/sales/EmployeeForm";
 import { RankingTable } from "@/components/sales/RankingTable";
 import { RankingCharts } from "@/components/sales/RankingCharts";
 import { MetricCards } from "@/components/sales/MetricCards";
+import { DateFilter, DateRange } from "@/components/sales/DateFilter";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { LogOut, BarChart3, ListOrdered, LayoutDashboard } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { startOfMonth, endOfMonth } from "date-fns";
 
 export const Route = createFileRoute("/")({
   component: Dashboard,
@@ -21,11 +23,16 @@ function Dashboard() {
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [displayUnit, setDisplayUnit] = useState<"BRL" | "PERCENT">("BRL");
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: startOfMonth(new Date()),
+    to: endOfMonth(new Date()),
+    label: "Este Mês"
+  });
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) fetchEmployees();
+      if (session) fetchData();
       else setLoading(false);
     });
 
@@ -33,7 +40,7 @@ function Dashboard() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) fetchEmployees();
+      if (session) fetchData();
       else {
         setEmployees([]);
         setLoading(false);
@@ -41,20 +48,44 @@ function Dashboard() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [dateRange]);
 
-  async function fetchEmployees() {
+  async function fetchData() {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // Fetch employees
+      const { data: employeesData, error: empError } = await supabase
         .from("employees")
         .select("*")
-        .order("sales_value", { ascending: false });
+        .order("name");
 
-      if (error) throw error;
-      setEmployees(data || []);
+      if (empError) throw empError;
+
+      // Fetch sales in the selected range
+      const { data: salesData, error: salesError } = await supabase
+        .from("sales")
+        .select("*")
+        .gte("sale_date", dateRange.from.toISOString().split('T')[0])
+        .lte("sale_date", dateRange.to.toISOString().split('T')[0]);
+
+      if (salesError) throw salesError;
+
+      // Combine data: Sum sales per employee
+      const employeesWithSales = (employeesData || []).map(emp => {
+        const empSales = (salesData || [])
+          .filter(sale => sale.employee_id === emp.id)
+          .reduce((sum, sale) => sum + Number(sale.amount), 0);
+        
+        return {
+          ...emp,
+          sales_value: empSales
+        };
+      }).sort((a, b) => b.sales_value - a.sales_value);
+
+      setEmployees(employeesWithSales);
     } catch (error) {
-      console.error("Erro ao buscar funcionários:", error);
+      console.error("Erro ao buscar dados:", error);
     } finally {
       setLoading(false);
     }
@@ -74,29 +105,36 @@ function Dashboard() {
     <div className="min-h-screen bg-slate-950 text-white p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="bg-blue-600 p-2.5 rounded-xl">
-              <BarChart3 className="h-6 w-6 text-white" />
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/50 p-6 rounded-2xl border border-slate-800 shadow-2xl backdrop-blur-sm">
+          <div className="flex items-center gap-4">
+            <div className="bg-blue-600 p-3 rounded-2xl shadow-lg shadow-blue-500/20">
+              <BarChart3 className="h-7 w-7 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Sales Ranking</h1>
-              <p className="text-slate-400 text-sm">Gerencie e visualize o desempenho da sua equipe</p>
+              <h1 className="text-3xl font-black tracking-tighter bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+                VENDAS RANKING
+              </h1>
+              <p className="text-slate-400 text-sm font-medium">Dashboard de Desempenho Comercial</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            <div className="flex items-center space-x-2 bg-slate-900 px-4 py-2 rounded-lg border border-slate-800">
-              <Label htmlFor="unit-toggle" className="text-sm font-medium text-slate-400">R$</Label>
+          <div className="flex flex-wrap items-center gap-4">
+            <DateFilter onRangeChange={setDateRange} />
+            
+            <div className="flex items-center space-x-2 bg-slate-900 px-4 py-2 rounded-xl border border-slate-800 shadow-inner">
+              <Label htmlFor="unit-toggle" className="text-xs font-bold text-slate-500">R$</Label>
               <Switch
                 id="unit-toggle"
                 checked={displayUnit === "PERCENT"}
                 onCheckedChange={(checked) => setDisplayUnit(checked ? "PERCENT" : "BRL")}
+                className="data-[state=checked]:bg-blue-600"
               />
-              <Label htmlFor="unit-toggle" className="text-sm font-medium text-slate-400">%</Label>
+              <Label htmlFor="unit-toggle" className="text-xs font-bold text-slate-500">%</Label>
             </div>
-            <EmployeeForm onSuccess={fetchEmployees} />
-            <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-400 hover:text-white hover:bg-slate-800">
+            
+            <EmployeeForm onSuccess={fetchData} />
+            
+            <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors">
               <LogOut className="h-5 w-5" />
             </Button>
           </div>
@@ -107,28 +145,34 @@ function Dashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="bg-slate-900 border border-slate-800 p-1">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-slate-800 data-[state=active]:text-white">
+          <TabsList className="bg-slate-900/80 border border-slate-800 p-1.5 rounded-xl backdrop-blur-md">
+            <TabsTrigger value="overview" className="rounded-lg px-6 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 transition-all">
               <LayoutDashboard className="h-4 w-4 mr-2" /> Visão Geral
             </TabsTrigger>
-            <TabsTrigger value="table" className="data-[state=active]:bg-slate-800 data-[state=active]:text-white">
+            <TabsTrigger value="table" className="rounded-lg px-6 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 transition-all">
               <ListOrdered className="h-4 w-4 mr-2" /> Ranking Detalhado
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6 outline-none">
+          <TabsContent value="overview" className="space-y-6 outline-none focus-visible:ring-0">
             <RankingCharts employees={employees} displayUnit={displayUnit} totalSales={totalSales} />
           </TabsContent>
 
-          <TabsContent value="table" className="outline-none">
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold">Classificação de Vendedores</h3>
-                <span className="text-xs text-slate-500">Total de {employees.length} registros</span>
+          <TabsContent value="table" className="outline-none focus-visible:ring-0">
+            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm shadow-xl">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-xl font-bold text-white">Classificação de Vendedores</h3>
+                  <p className="text-slate-500 text-sm mt-1">Período: {dateRange.label}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-2xl font-black text-blue-500">{employees.length}</span>
+                  <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Vendedores Ativos</p>
+                </div>
               </div>
               <RankingTable 
                 employees={employees} 
-                onUpdate={fetchEmployees} 
+                onUpdate={fetchData} 
                 displayUnit={displayUnit} 
                 totalSales={totalSales} 
               />
