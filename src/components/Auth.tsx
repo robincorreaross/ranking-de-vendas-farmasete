@@ -26,7 +26,13 @@ export function Auth() {
         toast.success("Login realizado com sucesso!");
       }
     } catch (error: any) {
-      toast.error(error.message);
+      if (error.message === "Invalid login credentials") {
+        toast.error("E-mail ou senha incorretos. Por favor, tente novamente.");
+      } else if (error.message === "Email not confirmed") {
+        toast.error("E-mail ainda não confirmado. Verifique sua caixa de entrada.");
+      } else {
+        toast.error(error.message);
+      }
     } finally {
       setLoading(false);
     }
