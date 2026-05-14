@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -20,19 +20,33 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus, Loader2, DollarSign, UserPlus } from "lucide-react";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const formSchema = z.object({
+const employeeSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   code: z.string().min(1, "Código é obrigatório"),
   phone: z.string().optional(),
-  sales_value: z.string().refine((val) => !isNaN(Number(val)), {
-    message: "Valor deve ser um número",
-  }),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+const saleSchema = z.object({
+  employee_id: z.string().min(1, "Selecione um funcionário"),
+  amount: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+    message: "Valor deve ser um número maior que zero",
+  }),
+  sale_date: z.string().min(1, "Data é obrigatória"),
+});
+
+type EmployeeValues = z.infer<typeof employeeSchema>;
+type SaleValues = z.infer<typeof saleSchema>;
 
 interface EmployeeFormProps {
   onSuccess: () => void;
