@@ -17,21 +17,29 @@ export function Auth() {
     setLoading(true);
     try {
       if (isSignUp) {
+        if (password.length < 6) {
+          toast.error("A senha deve ter pelo menos 6 caracteres.");
+          setLoading(false);
+          return;
+        }
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        toast.success("Verifique seu e-mail para confirmar o cadastro!");
+        toast.success("Conta criada com sucesso!");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Login realizado com sucesso!");
       }
     } catch (error: any) {
+      console.error("Auth error:", error);
       if (error.message === "Invalid login credentials") {
         toast.error("E-mail ou senha incorretos. Por favor, tente novamente.");
+      } else if (error.status === 422) {
+        toast.error("Erro ao cadastrar: Verifique se a senha é forte o suficiente ou se o e-mail já existe.");
       } else if (error.message === "Email not confirmed") {
         toast.error("E-mail ainda não confirmado. Verifique sua caixa de entrada.");
       } else {
-        toast.error(error.message);
+        toast.error(error.message || "Ocorreu um erro inesperado.");
       }
     } finally {
       setLoading(false);
