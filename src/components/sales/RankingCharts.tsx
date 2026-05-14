@@ -10,6 +10,8 @@ import {
   Pie,
   Cell,
   Legend,
+  AreaChart,
+  Area,
 } from "recharts";
 
 interface RankingChartsProps {
@@ -51,64 +53,84 @@ export function RankingCharts({ employees, displayUnit, totalSales }: RankingCha
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Bar Chart - Ranking */}
-      <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-sm">
-        <h3 className="text-lg font-bold text-white mb-6">Ranking de Vendas</h3>
-        <div className="h-[350px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 50 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-              <XAxis 
-                dataKey="name" 
-                stroke="#94a3b8" 
-                fontSize={12} 
-                angle={-45} 
-                textAnchor="end" 
-                interval={0}
-                height={60}
-              />
-              <YAxis 
-                stroke="#94a3b8" 
-                fontSize={12} 
-                tickFormatter={(val) => displayUnit === "PERCENT" ? `${val}%` : `R$ ${val >= 1000 ? (val/1000).toFixed(0) + 'k' : val}`}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar 
-                dataKey="value" 
-                fill="#3b82f6" 
-                radius={[4, 4, 0, 0]} 
-                barSize={40}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Bar Chart - Ranking */}
+        <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl shadow-xl backdrop-blur-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-white uppercase tracking-wider">Top Performance</h3>
+            <div className="bg-blue-500/10 text-blue-400 text-[10px] font-bold px-2 py-1 rounded">RANKING</div>
+          </div>
+          <div className="h-[350px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 50 }}>
+                <defs>
+                  <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#2563eb" stopOpacity={0.8} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                <XAxis 
+                  dataKey="name" 
+                  stroke="#475569" 
+                  fontSize={10} 
+                  fontWeight="bold"
+                  angle={-45} 
+                  textAnchor="end" 
+                  interval={0}
+                  height={60}
+                />
+                <YAxis 
+                  stroke="#475569" 
+                  fontSize={10} 
+                  fontWeight="bold"
+                  tickFormatter={(val) => displayUnit === "PERCENT" ? `${val}%` : `R$ ${val >= 1000 ? (val/1000).toFixed(0) + 'k' : val}`}
+                />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
+                <Bar 
+                  dataKey="value" 
+                  fill="url(#barGradient)" 
+                  radius={[6, 6, 0, 0]} 
+                  barSize={32}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-      </div>
 
-      {/* Pie Chart - Distribution */}
-      <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-sm">
-        <h3 className="text-lg font-bold text-white mb-6">Distribuição de Vendas</h3>
-        <div className="h-[350px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-              >
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="rgba(0,0,0,0.1)" />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend verticalAlign="bottom" height={36} wrapperStyle={{ paddingTop: '20px' }} />
-            </PieChart>
-          </ResponsiveContainer>
+        {/* Pie Chart - Distribution */}
+        <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl shadow-xl backdrop-blur-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-white uppercase tracking-wider">Market Share</h3>
+            <div className="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-2 py-1 rounded">DISTRIBUIÇÃO</div>
+          </div>
+          <div className="h-[350px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="45%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="rgba(0,0,0,0.2)" strokeWidth={2} />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+                <Legend 
+                  verticalAlign="bottom" 
+                  height={36} 
+                  iconType="circle"
+                  wrapperStyle={{ paddingTop: '20px', fontSize: '11px', fontWeight: 'bold' }} 
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </div>
