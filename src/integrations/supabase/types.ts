@@ -47,6 +47,41 @@ export type Database = {
         }
         Relationships: []
       }
+      sales: {
+        Row: {
+          amount: number
+          created_at: string
+          employee_id: string
+          id: string
+          sale_date: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          employee_id: string
+          id?: string
+          sale_date?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          employee_id?: string
+          id?: string
+          sale_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

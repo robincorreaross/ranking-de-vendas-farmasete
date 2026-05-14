@@ -1,11 +1,20 @@
-O erro **AuthWeakPasswordError** ocorre porque o sistema estava bloqueando senhas comuns ou fáceis de adivinhar (como "123456" ou "senha123") por segurança.
+Vou transformar o sistema em uma plataforma profissional de ranking de vendas com suporte a datas e filtros temporais.
 
-### O que eu fiz:
-1. **Desabilitei a verificação de senhas fracas**: Agora o sistema permitirá que você use qualquer senha que tenha pelo menos **6 caracteres**, sem bloquear senhas comuns.
-2. **Auto-confirmação mantida**: O cadastro continuará sendo ativado instantaneamente.
+### Alterações Estruturais (Banco de Dados)
+- Criar uma nova tabela `sales` vinculada a `employees`.
+- A tabela `sales` terá: `id`, `employee_id`, `amount`, `sale_date`, `created_at`.
+- Isso permite que um vendedor tenha múltiplas vendas em dias diferentes.
 
-### O que você deve fazer agora:
-- Tente se cadastrar novamente.
-- Certifique-se apenas de que a senha tenha **6 ou mais caracteres**.
+### Novas Funcionalidades
+1. **Filtro de Período**: Adicionar um seletor de data no cabeçalho (Hoje, Esta Semana, Este Mês, Personalizado).
+2. **Cadastro de Venda**: O formulário será atualizado para permitir cadastrar uma venda específica vinculada a um funcionário e uma data.
+3. **Ranking Dinâmico**: O ranking será calculado somando as vendas de cada funcionário dentro do período selecionado.
+4. **Gráfico de Evolução**: Adicionar um gráfico de linha mostrando a evolução das vendas ao longo do tempo no período filtrado.
 
-Dessa forma, o erro 422 não deve mais aparecer por causa da complexidade da senha.
+### Componentes Impactados
+- `src/components/sales/DateFilter.tsx`: Novo componente para seleção de período.
+- `src/components/sales/EmployeeForm.tsx`: Atualizado para cadastrar vendas ou funcionários.
+- `src/routes/index.tsx`: Lógica principal de filtragem e soma de valores.
+- `src/components/sales/RankingTable.tsx`: Mostrar a data da última venda ou o total no período.
+
+Deseja que eu prossiga com a criação da tabela de vendas e a migração da lógica?
