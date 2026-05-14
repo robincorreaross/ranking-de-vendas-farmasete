@@ -60,8 +60,8 @@ export function MetricCards({ employees }: MetricCardsProps) {
             <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform origin-left">
               {metric.value}
             </div>
-            <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-              <span className="text-emerald-500 font-bold">↑ 12%</span> em relação ao mês anterior
+            <p className="text-xs text-slate-500 mt-2 flex items-center gap-1 bg-slate-800/50 w-fit px-2 py-1 rounded-md">
+              Dados filtrados pelo período selecionado
             </p>
           </CardContent>
         </Card>
