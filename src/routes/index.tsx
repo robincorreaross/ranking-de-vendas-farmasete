@@ -15,6 +15,7 @@ import { LogOut, BarChart3, ListOrdered, LayoutDashboard, Settings } from "lucid
 import { Link } from "@tanstack/react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { startOfMonth, endOfMonth } from "date-fns";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   component: Dashboard,
@@ -33,50 +34,62 @@ function Dashboard() {
   });
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) fetchData();
-      else setLoading(false);
-    });
+    let isMounted = true;
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session) fetchData();
-      else {
-        setEmployees([]);
-        setLoading(false);
+    const initAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (isMounted) {
+          setSession(session);
+          if (session) {
+            await fetchData();
+          } else {
+            setLoading(false);
+          }
+        }
+      } catch (err) {
+        console.error("Session init error:", err);
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (isMounted) {
+        setSession(session);
+        if (session) {
+          fetchData().catch(console.error);
+        } else {
+          setEmployees([]);
+          setLoading(false);
+        }
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [dateRange]);
 
   async function fetchData() {
     try {
       setLoading(true);
       
-      // Fetch employees
-      const { data: employeesData, error: empError } = await supabase
-        .from("employees")
-        .select("*")
-        .order("name");
+      const [empRes, salesRes] = await Promise.all([
+        supabase.from("employees").select("*").order("name"),
+        supabase.from("sales")
+          .select("*")
+          .gte("sale_date", dateRange.from.toISOString().split('T')[0])
+          .lte("sale_date", dateRange.to.toISOString().split('T')[0])
+      ]);
 
-      if (empError) throw empError;
+      if (empRes.error) throw empRes.error;
+      if (salesRes.error) throw salesRes.error;
 
-      // Fetch sales in the selected range
-      const { data: salesData, error: salesError } = await supabase
-        .from("sales")
-        .select("*")
-        .gte("sale_date", dateRange.from.toISOString().split('T')[0])
-        .lte("sale_date", dateRange.to.toISOString().split('T')[0]);
-
-      if (salesError) throw salesError;
-
-      // Combine data: Sum sales per employee
-      const employeesWithSales = (employeesData || []).map(emp => {
-        const empSales = (salesData || [])
+      const employeesWithSales = (empRes.data || []).map(emp => {
+        const empSales = (salesRes.data || [])
           .filter(sale => sale.employee_id === emp.id)
           .reduce((sum, sale) => sum + Number(sale.amount), 0);
         
@@ -87,8 +100,9 @@ function Dashboard() {
       }).sort((a, b) => b.sales_value - a.sales_value);
 
       setEmployees(employeesWithSales);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao buscar dados:", error);
+      toast.error("Erro ao carregar dados: " + (error.message || "Verifique sua conexão"));
     } finally {
       setLoading(false);
     }

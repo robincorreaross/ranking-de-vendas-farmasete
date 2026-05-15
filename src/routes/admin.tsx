@@ -30,13 +30,21 @@ function AdminPanel() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted) return;
       setSession(session);
       if (session) {
-        fetchEmployees();
-        fetchSales();
-      } else setLoading(false);
+        Promise.all([fetchEmployees(), fetchSales()]).catch(err => {
+          console.error("Error initial fetching:", err);
+        });
+      } else {
+        setLoading(false);
+      }
     });
+
+    return () => { isMounted = false; };
   }, []);
 
   async function fetchEmployees() {
@@ -48,7 +56,8 @@ function AdminPanel() {
       if (error) throw error;
       setEmployees(data || []);
     } catch (error: any) {
-      toast.error(error.message);
+      console.error("fetchEmployees error:", error);
+      toast.error("Erro ao carregar funcionários: " + (error.message || "Erro desconhecido"));
     } finally {
       setLoading(false);
     }
@@ -63,31 +72,39 @@ function AdminPanel() {
       if (error) throw error;
       setSales(data || []);
     } catch (error: any) {
-      toast.error(error.message);
+      console.error("fetchSales error:", error);
+      toast.error("Erro ao carregar vendas: " + (error.message || "Erro desconhecido"));
     }
   }
 
   async function handleDeleteEmployee(id: string) {
-    if (!confirm("Tem certeza que deseja excluir este funcionário?")) return;
+    if (!id) return;
+    if (!confirm("Tem certeza que deseja excluir este funcionário? Esta ação excluirá também todas as vendas vinculadas.")) return;
+    
     try {
       const { error } = await supabase.from("employees").delete().eq("id", id);
       if (error) throw error;
       toast.success("Funcionário excluído!");
       fetchEmployees();
+      fetchSales(); // Refresh sales as they might be deleted by cascade or left orphaned
     } catch (error: any) {
-      toast.error(error.message);
+      console.error("handleDeleteEmployee error:", error);
+      toast.error("Erro ao excluir: " + (error.message || "Tente novamente"));
     }
   }
 
   async function handleDeleteSale(id: string) {
+    if (!id) return;
     if (!confirm("Tem certeza que deseja excluir esta venda?")) return;
+    
     try {
       const { error } = await supabase.from("sales").delete().eq("id", id);
       if (error) throw error;
       toast.success("Venda excluída!");
       fetchSales();
     } catch (error: any) {
-      toast.error(error.message);
+      console.error("handleDeleteSale error:", error);
+      toast.error("Erro ao excluir venda: " + (error.message || "Tente novamente"));
     }
   }
 
