@@ -23,13 +23,13 @@ interface RankingChartsProps {
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4"];
 
 export function RankingCharts({ employees, displayUnit, totalSales }: RankingChartsProps) {
-  const chartData = employees.map((emp) => ({
-    name: emp.name,
-    value: displayUnit === "PERCENT" 
-      ? (totalSales > 0 ? (emp.sales_value / totalSales) * 100 : 0)
-      : emp.sales_value,
-    originalValue: emp.sales_value,
-  }));
+  const chartData = employees
+    .filter(emp => emp.sales_value > 0)
+    .map((emp) => ({
+      name: emp.name,
+      value: emp.sales_value,
+      originalValue: emp.sales_value,
+    }));
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -63,7 +63,11 @@ export function RankingCharts({ employees, displayUnit, totalSales }: RankingCha
           </div>
           <div className="h-[350px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 50 }}>
+              <BarChart data={employees.map(emp => ({ 
+                name: emp.name, 
+                value: displayUnit === "PERCENT" ? (totalSales > 0 ? (emp.sales_value / totalSales) * 100 : 0) : emp.sales_value,
+                originalValue: emp.sales_value 
+              }))} margin={{ top: 10, right: 30, left: 20, bottom: 50 }}>
                 <defs>
                   <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#3b82f6" stopOpacity={1} />
