@@ -58,9 +58,15 @@ function Dashboard() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       if (!isMounted) return;
       
-      console.log("Auth state change:", event);
+      console.log("Auth event:", event);
       
-      // Only update if the session actually changed to avoid re-renders or loops
+      if (event === 'SIGNED_OUT') {
+        setSession(null);
+        setEmployees([]);
+        setLoading(false);
+        return;
+      }
+
       if (newSession?.access_token !== session?.access_token) {
         setSession(newSession);
         if (newSession) {
