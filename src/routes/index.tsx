@@ -38,10 +38,10 @@ function Dashboard() {
 
     const initAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
         if (isMounted) {
-          setSession(session);
-          if (session) {
+          setSession(currentSession);
+          if (currentSession) {
             await fetchData();
           } else {
             setLoading(false);
@@ -55,10 +55,15 @@ function Dashboard() {
 
     initAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (isMounted) {
-        setSession(session);
-        if (session) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      if (!isMounted) return;
+      
+      console.log("Auth state change:", event);
+      
+      // Only update if the session actually changed to avoid re-renders or loops
+      if (newSession?.access_token !== session?.access_token) {
+        setSession(newSession);
+        if (newSession) {
           fetchData().catch(console.error);
         } else {
           setEmployees([]);
