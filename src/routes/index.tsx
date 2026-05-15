@@ -170,8 +170,13 @@ function Dashboard() {
               </Button>
             </Link>
             
-            <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors">
+            <Button 
+              variant="ghost" 
+              onClick={handleLogout} 
+              className="text-rose-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors font-bold gap-2"
+            >
               <LogOut className="h-5 w-5" />
+              <span>Sair</span>
             </Button>
           </div>
         </header>
