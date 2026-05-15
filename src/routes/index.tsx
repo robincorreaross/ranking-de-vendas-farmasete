@@ -15,6 +15,7 @@ import { LogOut, BarChart3, ListOrdered, LayoutDashboard, Settings } from "lucid
 import { Link } from "@tanstack/react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { startOfMonth, endOfMonth } from "date-fns";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   component: Dashboard,
