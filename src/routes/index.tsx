@@ -129,9 +129,9 @@ function Dashboard() {
             </div>
             <div>
               <h1 className="text-3xl font-black tracking-tighter bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-                VENDAS RANKING
+                VENDAS FARMASETE
               </h1>
-              <p className="text-slate-400 text-sm font-medium">Dashboard de Desempenho Comercial</p>
+              <p className="text-slate-400 text-sm font-medium">Dashboard de Desempenho da Equipe</p>
             </div>
           </div>
           
