@@ -381,5 +381,3 @@ export function EmployeeForm({ onSuccess, employee }: EmployeeFormProps) {
     </Dialog>
   );
 }
-  );
-}
