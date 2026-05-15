@@ -112,7 +112,7 @@ export function RankingCharts({ employees, displayUnit, totalSales }: RankingCha
                   data={chartData}
                   cx="50%"
                   cy="45%"
-                  innerRadius={60}
+                  innerRadius={0}
                   outerRadius={100}
                   paddingAngle={5}
                   dataKey="value"
