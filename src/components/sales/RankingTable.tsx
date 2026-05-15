@@ -6,9 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { EmployeeForm } from "./EmployeeForm";
-import { Button } from "@/components/ui/button";
-import { Trash2, TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -20,19 +18,6 @@ interface RankingTableProps {
 }
 
 export function RankingTable({ employees, onUpdate, displayUnit, totalSales }: RankingTableProps) {
-  async function handleDelete(id: string) {
-    if (!confirm("Tem certeza que deseja excluir este funcionário?")) return;
-
-    try {
-      const { error } = await supabase.from("employees").delete().eq("id", id);
-      if (error) throw error;
-      toast.success("Funcionário excluído com sucesso!");
-      onUpdate();
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  }
-
   const formatValue = (value: number) => {
     if (displayUnit === "PERCENT") {
       const percent = totalSales > 0 ? (value / totalSales) * 100 : 0;
@@ -54,7 +39,7 @@ export function RankingTable({ employees, onUpdate, displayUnit, totalSales }: R
             <TableHead className="text-slate-400 font-medium">Código</TableHead>
             <TableHead className="text-slate-400 font-medium">Telefone</TableHead>
             <TableHead className="text-slate-400 font-medium text-right">Vendas</TableHead>
-            <TableHead className="text-slate-400 font-medium text-right">Ações</TableHead>
+            <TableHead className="text-slate-400 font-medium text-right">Participação</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -85,16 +70,8 @@ export function RankingTable({ employees, onUpdate, displayUnit, totalSales }: R
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                <div className="flex justify-end gap-1">
-                  <EmployeeForm employee={employee} onSuccess={onUpdate} />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10"
-                    onClick={() => handleDelete(employee.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                <div className="flex items-center justify-end gap-1 text-[10px] text-slate-500">
+                  {((employee.sales_value / (totalSales || 1)) * 100).toFixed(1)}%
                 </div>
               </TableCell>
             </TableRow>
