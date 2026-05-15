@@ -7,6 +7,7 @@ import { RankingTable } from "@/components/sales/RankingTable";
 import { RankingCharts } from "@/components/sales/RankingCharts";
 import { MetricCards } from "@/components/sales/MetricCards";
 import { DateFilter, DateRange } from "@/components/sales/DateFilter";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -23,7 +24,8 @@ function Dashboard() {
   const [session, setSession] = useState<any>(null);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [displayUnit, setDisplayUnit] = useState<"BRL" | "PERCENT">("BRL");
+  const [displayUnit, setDisplayUnit] = useState<"BRL" | "PERCENT">("PERCENT");
+  const [showValues, setShowValues] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
@@ -122,6 +124,16 @@ function Dashboard() {
           <div className="flex flex-wrap items-center gap-4">
             <DateFilter onRangeChange={setDateRange} />
             
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowValues(!showValues)}
+              className="bg-slate-900 border-slate-800 text-slate-400 hover:text-white"
+            >
+              {showValues ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+              {showValues ? "Ocultar" : "Mostrar"}
+            </Button>
+            
             <div className="flex items-center space-x-2 bg-slate-900 px-4 py-2 rounded-xl border border-slate-800 shadow-inner">
               <Label htmlFor="unit-toggle" className="text-xs font-bold text-slate-500">R$</Label>
               <Switch
@@ -146,7 +158,7 @@ function Dashboard() {
         </header>
 
         {/* Metrics */}
-        <MetricCards employees={employees} />
+        <MetricCards employees={employees} showValues={showValues} />
 
         {/* Main Content */}
         <Tabs defaultValue="overview" className="space-y-6">
@@ -180,6 +192,7 @@ function Dashboard() {
                 onUpdate={fetchData} 
                 displayUnit={displayUnit} 
                 totalSales={totalSales} 
+                showValues={showValues}
               />
             </div>
           </TabsContent>
