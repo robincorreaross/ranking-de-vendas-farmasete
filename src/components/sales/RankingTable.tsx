@@ -15,10 +15,12 @@ interface RankingTableProps {
   onUpdate: () => void;
   displayUnit: "BRL" | "PERCENT";
   totalSales: number;
+  showValues?: boolean;
 }
 
-export function RankingTable({ employees, onUpdate, displayUnit, totalSales }: RankingTableProps) {
+export function RankingTable({ employees, onUpdate, displayUnit, totalSales, showValues = true }: RankingTableProps) {
   const formatValue = (value: number) => {
+    if (!showValues && displayUnit === "BRL") return "••••••";
     if (displayUnit === "PERCENT") {
       const percent = totalSales > 0 ? (value / totalSales) * 100 : 0;
       return `${percent.toFixed(1)}%`;
@@ -65,7 +67,7 @@ export function RankingTable({ employees, onUpdate, displayUnit, totalSales }: R
                     ) : (
                       <TrendingDown className="h-3 w-3 text-rose-500" />
                     )}
-                    <span>{((employee.sales_value / (totalSales || 1)) * 100).toFixed(1)}% do total</span>
+                    <span>{showValues ? `${((employee.sales_value / (totalSales || 1)) * 100).toFixed(1)}% do total` : "••%"}</span>
                   </div>
                 </div>
               </TableCell>

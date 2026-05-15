@@ -2,10 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, DollarSign, Target, TrendingUp } from "lucide-react";
 
 interface MetricCardsProps {
-  employees: any[];
+   employees: any[];
+  showValues?: boolean;
 }
 
-export function MetricCards({ employees }: MetricCardsProps) {
+export function MetricCards({ employees, showValues = true }: MetricCardsProps) {
   const totalSales = employees.reduce((acc, curr) => acc + (curr.sales_value || 0), 0);
   const averageSales = employees.length > 0 ? totalSales / employees.length : 0;
   const topSales = employees.length > 0 ? Math.max(...employees.map(e => e.sales_value)) : 0;
@@ -16,21 +17,21 @@ export function MetricCards({ employees }: MetricCardsProps) {
   const metrics = [
     {
       title: "Vendas Totais",
-      value: formatCurrency(totalSales),
+      value: showValues ? formatCurrency(totalSales) : "••••••",
       icon: DollarSign,
       color: "text-emerald-500",
       bg: "bg-emerald-500/10",
     },
     {
       title: "Média por Vendedor",
-      value: formatCurrency(averageSales),
+      value: showValues ? formatCurrency(averageSales) : "••••••",
       icon: Target,
       color: "text-blue-500",
       bg: "bg-blue-500/10",
     },
     {
       title: "Maior Venda",
-      value: formatCurrency(topSales),
+      value: showValues ? formatCurrency(topSales) : "••••••",
       icon: TrendingUp,
       color: "text-amber-500",
       bg: "bg-amber-500/10",
