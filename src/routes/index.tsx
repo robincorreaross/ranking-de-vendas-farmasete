@@ -10,7 +10,8 @@ import { DateFilter, DateRange } from "@/components/sales/DateFilter";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { LogOut, BarChart3, ListOrdered, LayoutDashboard } from "lucide-react";
+import { LogOut, BarChart3, ListOrdered, LayoutDashboard, Settings } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { startOfMonth, endOfMonth } from "date-fns";
 
@@ -132,7 +133,11 @@ function Dashboard() {
               <Label htmlFor="unit-toggle" className="text-xs font-bold text-slate-500">%</Label>
             </div>
             
-            <EmployeeForm onSuccess={fetchData} />
+            <Link to="/admin">
+              <Button className="bg-slate-800 hover:bg-slate-700 text-white border-slate-700">
+                <Settings className="mr-2 h-4 w-4" /> Painel Admin
+              </Button>
+            </Link>
             
             <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors">
               <LogOut className="h-5 w-5" />
