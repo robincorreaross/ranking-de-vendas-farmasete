@@ -161,19 +161,15 @@ function Dashboard() {
         <MetricCards employees={employees} showValues={showValues} />
 
         {/* Main Content */}
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs defaultValue="table" className="space-y-6">
           <TabsList className="bg-slate-900/80 border border-slate-800 p-1.5 rounded-xl backdrop-blur-md">
-            <TabsTrigger value="overview" className="rounded-lg px-6 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 transition-all">
-              <LayoutDashboard className="h-4 w-4 mr-2" /> Visão Geral
-            </TabsTrigger>
             <TabsTrigger value="table" className="rounded-lg px-6 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 transition-all">
-              <ListOrdered className="h-4 w-4 mr-2" /> Ranking Detalhado
+              <ListOrdered className="h-4 w-4 mr-2" /> Top Vendedores
+            </TabsTrigger>
+            <TabsTrigger value="overview" className="rounded-lg px-6 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 transition-all">
+              <BarChart3 className="h-4 w-4 mr-2" /> Gráfico de Performance
             </TabsTrigger>
           </TabsList>
-
-          <TabsContent value="overview" className="space-y-6 outline-none focus-visible:ring-0">
-            <RankingCharts employees={employees} displayUnit={displayUnit} totalSales={totalSales} />
-          </TabsContent>
 
           <TabsContent value="table" className="outline-none focus-visible:ring-0">
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm shadow-xl">
@@ -195,6 +191,10 @@ function Dashboard() {
                 showValues={showValues}
               />
             </div>
+          </TabsContent>
+
+          <TabsContent value="overview" className="space-y-6 outline-none focus-visible:ring-0">
+            <RankingCharts employees={employees} displayUnit={displayUnit} totalSales={totalSales} />
           </TabsContent>
         </Tabs>
       </div>
