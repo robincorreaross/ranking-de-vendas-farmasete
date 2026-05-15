@@ -10,7 +10,7 @@ export function Auth() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSignUp, setIsSignUp] = useState(false);
+  const isSignUp = false; // Registration disabled by user request
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,12 +86,9 @@ export function Auth() {
             </Button>
           </form>
           <div className="mt-6 text-center">
-            <button
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-blue-400 hover:text-blue-300"
-            >
-              {isSignUp ? "Já tem uma conta? Entre aqui" : "Não tem conta? Cadastre-se agora"}
-            </button>
+            <p className="text-xs text-slate-500 italic">
+              Acesso restrito a administradores autorizados.
+            </p>
           </div>
         </CardContent>
       </Card>
