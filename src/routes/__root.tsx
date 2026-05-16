@@ -72,14 +72,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Rankig Vendas" },
+      { name: "description", content: "FarmaSETE Sales Ranking: Track and visualize sales performance with detailed employee data." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Rankig Vendas" },
+      { property: "og:description", content: "FarmaSETE Sales Ranking: Track and visualize sales performance with detailed employee data." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Rankig Vendas" },
+      { name: "twitter:description", content: "FarmaSETE Sales Ranking: Track and visualize sales performance with detailed employee data." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c93e7432-0cc5-4909-bccf-683f6e547ab8/id-preview-1a2a662e--f304d913-b9a7-4a17-b4a2-a890e1522154.lovable.app-1778865577170.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c93e7432-0cc5-4909-bccf-683f6e547ab8/id-preview-1a2a662e--f304d913-b9a7-4a17-b4a2-a890e1522154.lovable.app-1778865577170.png" },
     ],
     links: [
       {
