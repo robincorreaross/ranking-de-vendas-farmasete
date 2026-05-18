@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { LogOut, BarChart3, ListOrdered, LayoutDashboard, Settings } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { startOfMonth, endOfMonth } from "date-fns";
+import { startOfMonth, endOfMonth, format } from "date-fns";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
@@ -92,8 +92,8 @@ function Dashboard() {
         supabase.from("employees").select("*").order("name"),
         supabase.from("sales")
           .select("*")
-          .gte("sale_date", dateRange.from.toISOString().split('T')[0])
-          .lte("sale_date", dateRange.to.toISOString().split('T')[0])
+          .gte("sale_date", format(dateRange.from, 'yyyy-MM-dd'))
+          .lte("sale_date", format(dateRange.to, 'yyyy-MM-dd'))
       ]);
 
       if (empRes.error) throw empRes.error;
