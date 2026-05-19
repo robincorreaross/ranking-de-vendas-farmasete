@@ -32,9 +32,15 @@ import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const employeeSchema = z.object({
-  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  code: z.string().min(1, "Código é obrigatório"),
-  phone: z.string().optional(),
+  name: z.string()
+    .min(2, "Nome deve ter pelo menos 2 caracteres")
+    .transform(val => val.replace(/<[^>]*>/g, '').trim()),
+  code: z.string()
+    .min(1, "Código é obrigatório")
+    .transform(val => val.replace(/<[^>]*>/g, '').trim()),
+  phone: z.string()
+    .optional()
+    .transform(val => val ? val.replace(/<[^>]*>/g, '').trim() : val),
 });
 
 const saleSchema = z.object({
@@ -44,6 +50,7 @@ const saleSchema = z.object({
   }),
   sale_date: z.string().min(1, "Data é obrigatória"),
 });
+
 
 type EmployeeValues = z.infer<typeof employeeSchema>;
 type SaleValues = z.infer<typeof saleSchema>;
