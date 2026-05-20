@@ -24,6 +24,7 @@ export const Route = createFileRoute("/")({
 function Dashboard() {
   const [session, setSession] = useState<any>(null);
   const [employees, setEmployees] = useState<any[]>([]);
+  const [generalEmployees, setGeneralEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [displayUnit, setDisplayUnit] = useState<"BRL" | "PERCENT">("PERCENT");
   const [showValues, setShowValues] = useState(false);
