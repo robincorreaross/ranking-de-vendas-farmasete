@@ -6,8 +6,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CalendarIcon, ChevronDown } from "lucide-react";
-import { format, startOfDay, endOfDay, startOfYesterday, startOfMonth, endOfMonth, subDays, setMonth, isSameMonth } from "date-fns";
+import { format, startOfDay, endOfDay, startOfYesterday, startOfMonth, endOfMonth, subDays, setMonth, isSameMonth, setYear, getYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
@@ -65,6 +72,10 @@ export function DateFilter({ onRangeChange }: DateFilterProps) {
   const [range, setRange] = useState<DateRange>(presets[3].getValue());
   const [isCustom, setIsCustom] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedYear, setSelectedYear] = useState<number>(getYear(new Date()));
+
+  const currentYear = getYear(new Date());
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
   const handlePresetClick = (preset: typeof presets[0]) => {
     const newRange = preset.getValue();
@@ -72,15 +83,17 @@ export function DateFilter({ onRangeChange }: DateFilterProps) {
     setIsCustom(false);
     onRangeChange(newRange);
     setIsOpen(false);
+    setSelectedYear(getYear(newRange.from));
   };
 
   const handleMonthClick = (monthIndex: number) => {
-    const now = new Date();
-    const dateInMonth = setMonth(now, monthIndex);
+    let dateInMonth = setYear(new Date(), selectedYear);
+    dateInMonth = setMonth(dateInMonth, monthIndex);
+    
     const newRange = {
       from: startOfMonth(dateInMonth),
       to: endOfMonth(dateInMonth),
-      label: months[monthIndex]
+      label: `${months[monthIndex]} ${selectedYear}`
     };
     setRange(newRange);
     setIsCustom(false);
@@ -90,8 +103,8 @@ export function DateFilter({ onRangeChange }: DateFilterProps) {
 
   const isMonthSelected = (monthIndex: number) => {
     if (isCustom) return false;
-    const now = new Date();
-    const monthDate = setMonth(now, monthIndex);
+    let monthDate = setYear(new Date(), selectedYear);
+    monthDate = setMonth(monthDate, monthIndex);
     
     return isSameMonth(range.from, monthDate) && 
            isSameMonth(range.to, monthDate) &&
@@ -126,7 +139,7 @@ export function DateFilter({ onRangeChange }: DateFilterProps) {
             variant="outline"
             size="sm"
             className={cn(
-              "bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white h-8 md:h-10",
+              "bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white h-8 md:h-10",
               isCustom && "border-blue-500/50 text-blue-400"
             )}
           >
@@ -146,8 +159,20 @@ export function DateFilter({ onRangeChange }: DateFilterProps) {
         </PopoverTrigger>
         <PopoverContent className="w-auto p-4 bg-slate-900 border-slate-800" align="end">
           <div className="flex flex-col gap-4">
-            <div className="space-y-2">
-              <h4 className="text-xs font-medium text-slate-400 uppercase tracking-wider px-1">Meses de {new Date().getFullYear()}</h4>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <h4 className="text-xs font-medium text-slate-400 uppercase tracking-wider">Selecione o Ano e Mês</h4>
+                <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
+                  <SelectTrigger className="w-[100px] h-8 text-xs bg-slate-800 border-slate-700">
+                    <SelectValue placeholder="Ano" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                    {years.map(y => (
+                      <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="grid grid-cols-4 gap-1">
                 {months.map((month, index) => (
                   <Button
@@ -204,3 +229,4 @@ export function DateFilter({ onRangeChange }: DateFilterProps) {
     </div>
   );
 }
+
