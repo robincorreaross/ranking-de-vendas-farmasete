@@ -222,6 +222,9 @@ function Dashboard() {
             <TabsTrigger value="table" className="rounded-lg px-6 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 transition-all">
               <ListOrdered className="h-4 w-4 mr-2" /> Top Vendedores
             </TabsTrigger>
+            <TabsTrigger value="general" className="rounded-lg px-6 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 transition-all">
+              <Globe className="h-4 w-4 mr-2" /> Ranking Geral
+            </TabsTrigger>
             <TabsTrigger value="overview" className="rounded-lg px-6 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 transition-all">
               <BarChart3 className="h-4 w-4 mr-2" /> Gráfico de Performance
             </TabsTrigger>
