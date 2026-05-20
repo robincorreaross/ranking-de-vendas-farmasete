@@ -12,7 +12,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { EmployeeForm } from "@/components/sales/EmployeeForm";
-import { Trash2, Users, Receipt, ArrowLeft, Plus } from "lucide-react";
+import { SaleForm } from "@/components/sales/SaleForm";
+import { Trash2, Users, Receipt, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,6 +29,7 @@ function AdminPanel() {
   const [employees, setEmployees] = useState<any[]>([]);
   const [sales, setSales] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("employees");
 
   useEffect(() => {
     let isMounted = true;
@@ -121,23 +123,27 @@ function AdminPanel() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl font-black tracking-tighter text-white">
-                PAINEL ADMINISTRATIVO
+              <h1 className="text-2xl font-black tracking-tighter text-white uppercase">
+                Painel Administrativo
               </h1>
               <p className="text-slate-400 text-sm font-medium">Gestão de Funcionários e Vendas</p>
             </div>
           </div>
           <div className="flex gap-2">
-            <EmployeeForm onSuccess={() => { fetchEmployees(); fetchSales(); }} />
+            {activeTab === "employees" ? (
+              <EmployeeForm onSuccess={fetchEmployees} />
+            ) : (
+              <SaleForm onSuccess={fetchSales} />
+            )}
           </div>
         </header>
 
-        <Tabs defaultValue="employees" className="space-y-6">
+        <Tabs defaultValue="employees" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-slate-900/80 border border-slate-800 p-1.5 rounded-xl">
             <TabsTrigger value="employees" className="rounded-lg px-6 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">
               <Users className="h-4 w-4 mr-2" /> Funcionários
             </TabsTrigger>
-            <TabsTrigger value="sales" className="rounded-lg px-6 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">
+            <TabsTrigger value="sales" className="rounded-lg px-6 data-[state=active]:bg-emerald-600 data-[state=active]:text-white transition-all">
               <Receipt className="h-4 w-4 mr-2" /> Vendas
             </TabsTrigger>
           </TabsList>
@@ -146,7 +152,7 @@ function AdminPanel() {
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm shadow-xl">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-slate-800">
+                  <TableRow className="border-slate-800 hover:bg-transparent">
                     <TableHead className="text-slate-400">Nome</TableHead>
                     <TableHead className="text-slate-400">Código</TableHead>
                     <TableHead className="text-slate-400">Telefone</TableHead>
@@ -155,7 +161,7 @@ function AdminPanel() {
                 </TableHeader>
                 <TableBody>
                   {employees.map((emp) => (
-                    <TableRow key={emp.id} className="border-slate-800">
+                    <TableRow key={emp.id} className="border-slate-800 hover:bg-slate-800/30">
                       <TableCell className="text-white font-medium">{emp.name}</TableCell>
                       <TableCell className="text-slate-400 font-mono text-xs">{emp.code}</TableCell>
                       <TableCell className="text-slate-400 text-xs">{emp.phone || "-"}</TableCell>
@@ -174,6 +180,13 @@ function AdminPanel() {
                       </TableCell>
                     </TableRow>
                   ))}
+                  {employees.length === 0 && !loading && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-8 text-slate-500">
+                        Nenhum funcionário encontrado.
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -183,7 +196,7 @@ function AdminPanel() {
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm shadow-xl">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-slate-800">
+                  <TableRow className="border-slate-800 hover:bg-transparent">
                     <TableHead className="text-slate-400">Data</TableHead>
                     <TableHead className="text-slate-400">Funcionário</TableHead>
                     <TableHead className="text-slate-400">Valor</TableHead>
@@ -192,7 +205,7 @@ function AdminPanel() {
                 </TableHeader>
                 <TableBody>
                   {sales.map((sale) => (
-                    <TableRow key={sale.id} className="border-slate-800">
+                    <TableRow key={sale.id} className="border-slate-800 hover:bg-slate-800/30">
                       <TableCell className="text-slate-300">
                         {format(new Date(sale.sale_date), "dd 'de' MMMM, yyyy", { locale: ptBR })}
                       </TableCell>
@@ -217,6 +230,13 @@ function AdminPanel() {
                       </TableCell>
                     </TableRow>
                   ))}
+                  {sales.length === 0 && !loading && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-8 text-slate-500">
+                        Nenhuma venda encontrada.
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -226,3 +246,4 @@ function AdminPanel() {
     </div>
   );
 }
+
