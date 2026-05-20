@@ -87,7 +87,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_sales_ranking: {
+        Args: { end_date: string; start_date: string }
+        Returns: {
+          employee_code: string
+          employee_name: string
+          participation_percent: number
+          total_sales: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
