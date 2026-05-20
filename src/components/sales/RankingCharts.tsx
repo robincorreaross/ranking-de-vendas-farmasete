@@ -27,7 +27,7 @@ export function RankingCharts({ employees, displayUnit, totalSales }: RankingCha
     .filter(emp => emp.sales_value > 0)
     .map((emp) => ({
       name: emp.name,
-      value: emp.sales_value,
+      value: displayUnit === "PERCENT" ? (totalSales > 0 ? (emp.sales_value / totalSales) * 100 : 0) : emp.sales_value,
       originalValue: emp.sales_value,
     }));
 
