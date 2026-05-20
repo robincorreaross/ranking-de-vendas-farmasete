@@ -11,10 +11,10 @@ import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { LogOut, BarChart3, ListOrdered, LayoutDashboard, Settings } from "lucide-react";
+import { LogOut, BarChart3, ListOrdered, LayoutDashboard, Settings, Globe } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { startOfMonth, endOfMonth, format } from "date-fns";
+import { startOfMonth, endOfMonth, format, subYears, startOfDay } from "date-fns";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/")({
 function Dashboard() {
   const [session, setSession] = useState<any>(null);
   const [employees, setEmployees] = useState<any[]>([]);
+  const [generalEmployees, setGeneralEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [displayUnit, setDisplayUnit] = useState<"BRL" | "PERCENT">("PERCENT");
   const [showValues, setShowValues] = useState(false);
@@ -88,18 +89,29 @@ function Dashboard() {
     try {
       setLoading(true);
       
-      const [empRes, salesRes] = await Promise.all([
+      const threeYearsAgo = subYears(new Date(), 3);
+      const today = new Date();
+
+      const [empRes, salesRes, generalSalesRes] = await Promise.all([
         supabase.from("employees").select("*").order("name"),
         supabase.from("sales")
           .select("*")
           .gte("sale_date", format(dateRange.from, 'yyyy-MM-dd'))
-          .lte("sale_date", format(dateRange.to, 'yyyy-MM-dd'))
+          .lte("sale_date", format(dateRange.to, 'yyyy-MM-dd')),
+        supabase.from("sales")
+          .select("*")
+          .gte("sale_date", format(threeYearsAgo, 'yyyy-MM-dd'))
+          .lte("sale_date", format(today, 'yyyy-MM-dd'))
       ]);
 
       if (empRes.error) throw empRes.error;
       if (salesRes.error) throw salesRes.error;
+      if (generalSalesRes.error) throw generalSalesRes.error;
 
-      const employeesWithSales = (empRes.data || []).map(emp => {
+      const allEmployees = empRes.data || [];
+
+      // Calculate current period ranking
+      const employeesWithSales = allEmployees.map(emp => {
         const empSales = (salesRes.data || [])
           .filter(sale => sale.employee_id === emp.id)
           .reduce((sum, sale) => sum + Number(sale.amount), 0);
@@ -110,7 +122,20 @@ function Dashboard() {
         };
       }).sort((a, b) => b.sales_value - a.sales_value);
 
+      // Calculate general ranking (3 years)
+      const generalRanking = allEmployees.map(emp => {
+        const empSales = (generalSalesRes.data || [])
+          .filter(sale => sale.employee_id === emp.id)
+          .reduce((sum, sale) => sum + Number(sale.amount), 0);
+        
+        return {
+          ...emp,
+          sales_value: empSales
+        };
+      }).sort((a, b) => b.sales_value - a.sales_value);
+
       setEmployees(employeesWithSales);
+      setGeneralEmployees(generalRanking);
     } catch (error: any) {
       console.error("Erro ao buscar dados:", error);
       toast.error("Erro ao carregar dados: " + (error.message || "Verifique sua conexão"));
@@ -124,6 +149,7 @@ function Dashboard() {
   };
 
   const totalSales = employees.reduce((acc, curr) => acc + (curr.sales_value || 0), 0);
+  const totalGeneralSales = generalEmployees.reduce((acc, curr) => acc + (curr.sales_value || 0), 0);
 
   if (!session) {
     return <Auth />;
@@ -196,6 +222,9 @@ function Dashboard() {
             <TabsTrigger value="table" className="rounded-lg px-6 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 transition-all">
               <ListOrdered className="h-4 w-4 mr-2" /> Top Vendedores
             </TabsTrigger>
+            <TabsTrigger value="general" className="rounded-lg px-6 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 transition-all">
+              <Globe className="h-4 w-4 mr-2" /> Ranking Geral
+            </TabsTrigger>
             <TabsTrigger value="overview" className="rounded-lg px-6 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 transition-all">
               <BarChart3 className="h-4 w-4 mr-2" /> Gráfico de Performance
             </TabsTrigger>
@@ -218,6 +247,28 @@ function Dashboard() {
                 onUpdate={fetchData} 
                 displayUnit={displayUnit} 
                 totalSales={totalSales} 
+                showValues={showValues}
+              />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="general" className="outline-none focus-visible:ring-0">
+            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm shadow-xl">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-xl font-bold text-white">Ranking Geral (Últimos 3 Anos)</h3>
+                  <p className="text-slate-500 text-sm mt-1">Acumulado desde {format(subYears(new Date(), 3), 'dd/MM/yyyy')}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-2xl font-black text-blue-500">{generalEmployees.length}</span>
+                  <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Vendedores no Histórico</p>
+                </div>
+              </div>
+              <RankingTable 
+                employees={generalEmployees} 
+                onUpdate={fetchData} 
+                displayUnit={displayUnit} 
+                totalSales={totalGeneralSales} 
                 showValues={showValues}
               />
             </div>
