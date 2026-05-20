@@ -42,9 +42,10 @@ type SaleValues = z.infer<typeof saleSchema>;
 
 interface SaleFormProps {
   onSuccess: () => void;
+  sale?: any;
 }
 
-export function SaleForm({ onSuccess }: SaleFormProps) {
+export function SaleForm({ onSuccess, sale }: SaleFormProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [employeesList, setEmployeesList] = useState<any[]>([]);
@@ -52,17 +53,24 @@ export function SaleForm({ onSuccess }: SaleFormProps) {
   const saleForm = useForm<SaleValues>({
     resolver: zodResolver(saleSchema),
     defaultValues: {
-      employee_id: "",
-      amount: "",
-      sale_date: new Date().toISOString().split('T')[0],
+      employee_id: sale?.employee_id || "",
+      amount: sale?.amount?.toString() || "",
+      sale_date: sale?.sale_date || new Date().toISOString().split('T')[0],
     },
   });
 
   useEffect(() => {
     if (open) {
       fetchEmployees();
+      if (sale) {
+        saleForm.reset({
+          employee_id: sale.employee_id,
+          amount: sale.amount.toString(),
+          sale_date: sale.sale_date,
+        });
+      }
     }
-  }, [open]);
+  }, [open, sale]);
 
   async function fetchEmployees() {
     const { data } = await supabase.from("employees").select("id, name").order("name");
@@ -82,12 +90,21 @@ export function SaleForm({ onSuccess }: SaleFormProps) {
         user_id: userData.user.id,
       };
 
-      const { error } = await supabase.from("sales").insert([saleData]);
-      if (error) throw error;
+      if (sale) {
+        const { error } = await supabase
+          .from("sales")
+          .update(saleData)
+          .eq("id", sale.id);
+        if (error) throw error;
+        toast.success("Venda atualizada!");
+      } else {
+        const { error } = await supabase.from("sales").insert([saleData]);
+        if (error) throw error;
+        toast.success("Venda registrada com sucesso!");
+      }
 
-      toast.success("Venda registrada com sucesso!");
       setOpen(false);
-      saleForm.reset();
+      if (!sale) saleForm.reset();
       onSuccess();
     } catch (error: any) {
       toast.error(error.message);
@@ -99,18 +116,30 @@ export function SaleForm({ onSuccess }: SaleFormProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-lg shadow-emerald-600/20">
-          <Plus className="mr-2 h-4 w-4" /> Nova Venda
-        </Button>
+        {sale ? (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-blue-400 hover:text-blue-300 hover:bg-slate-800/50 flex items-center gap-1.5 px-3"
+          >
+            Editar
+          </Button>
+        ) : (
+          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-lg shadow-emerald-600/20">
+            <Plus className="mr-2 h-4 w-4" /> Nova Venda
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] bg-slate-900 text-white border-slate-800 p-0 overflow-hidden shadow-2xl">
         <div className="p-6">
           <DialogHeader className="mb-6">
             <DialogTitle className="text-xl font-bold flex items-center gap-2">
               <DollarSign className="w-5 h-5 text-emerald-400" />
-              Registrar Venda
+              {sale ? "Editar Venda" : "Registrar Venda"}
             </DialogTitle>
-            <p className="text-sm text-slate-400">Adicione uma nova venda ao histórico</p>
+            <p className="text-sm text-slate-400">
+              {sale ? "Atualize os dados desta venda" : "Adicione uma nova venda ao histórico"}
+            </p>
           </DialogHeader>
           <Form {...saleForm}>
             <form onSubmit={saleForm.handleSubmit(onSaleSubmit)} className="space-y-4">
@@ -120,7 +149,7 @@ export function SaleForm({ onSuccess }: SaleFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-slate-300">Funcionário</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
                           <SelectValue placeholder="Selecione o vendedor" />
@@ -177,7 +206,7 @@ export function SaleForm({ onSuccess }: SaleFormProps) {
                   Cancelar
                 </Button>
                 <Button type="submit" className="flex-[2] bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/20" disabled={loading}>
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirmar Venda"}
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (sale ? "Salvar Alterações" : "Confirmar Venda")}
                 </Button>
               </div>
             </form>
@@ -187,3 +216,4 @@ export function SaleForm({ onSuccess }: SaleFormProps) {
     </Dialog>
   );
 }
+
