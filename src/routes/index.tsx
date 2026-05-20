@@ -272,6 +272,7 @@ function Dashboard() {
                 showValues={showValues}
               />
             </div>
+          </TabsContent>
 
           <TabsContent value="overview" className="space-y-6 outline-none focus-visible:ring-0">
             <RankingCharts employees={employees} displayUnit={displayUnit} totalSales={totalSales} />
