@@ -149,6 +149,7 @@ function Dashboard() {
   };
 
   const totalSales = employees.reduce((acc, curr) => acc + (curr.sales_value || 0), 0);
+  const totalGeneralSales = generalEmployees.reduce((acc, curr) => acc + (curr.sales_value || 0), 0);
 
   if (!session) {
     return <Auth />;
