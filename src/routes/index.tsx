@@ -11,10 +11,10 @@ import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { LogOut, BarChart3, ListOrdered, LayoutDashboard, Settings } from "lucide-react";
+import { LogOut, BarChart3, ListOrdered, LayoutDashboard, Settings, Globe } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { startOfMonth, endOfMonth, format } from "date-fns";
+import { startOfMonth, endOfMonth, format, subYears, startOfDay } from "date-fns";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
