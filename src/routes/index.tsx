@@ -252,6 +252,27 @@ function Dashboard() {
             </div>
           </TabsContent>
 
+          <TabsContent value="general" className="outline-none focus-visible:ring-0">
+            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm shadow-xl">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-xl font-bold text-white">Ranking Geral (Últimos 3 Anos)</h3>
+                  <p className="text-slate-500 text-sm mt-1">Acumulado desde {format(subYears(new Date(), 3), 'dd/MM/yyyy')}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-2xl font-black text-blue-500">{generalEmployees.length}</span>
+                  <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Vendedores no Histórico</p>
+                </div>
+              </div>
+              <RankingTable 
+                employees={generalEmployees} 
+                onUpdate={fetchData} 
+                displayUnit={displayUnit} 
+                totalSales={totalGeneralSales} 
+                showValues={showValues}
+              />
+            </div>
+
           <TabsContent value="overview" className="space-y-6 outline-none focus-visible:ring-0">
             <RankingCharts employees={employees} displayUnit={displayUnit} totalSales={totalSales} />
           </TabsContent>
