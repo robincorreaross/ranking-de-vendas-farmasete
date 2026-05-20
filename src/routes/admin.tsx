@@ -219,14 +219,17 @@ function AdminPanel() {
                         }).format(sale.amount)}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10"
-                          onClick={() => handleDeleteSale(sale.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex justify-end gap-2">
+                          <SaleForm sale={sale} onSuccess={fetchSales} />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10"
+                            onClick={() => handleDeleteSale(sale.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
