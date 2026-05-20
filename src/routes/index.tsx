@@ -89,18 +89,29 @@ function Dashboard() {
     try {
       setLoading(true);
       
-      const [empRes, salesRes] = await Promise.all([
+      const threeYearsAgo = subYears(new Date(), 3);
+      const today = new Date();
+
+      const [empRes, salesRes, generalSalesRes] = await Promise.all([
         supabase.from("employees").select("*").order("name"),
         supabase.from("sales")
           .select("*")
           .gte("sale_date", format(dateRange.from, 'yyyy-MM-dd'))
-          .lte("sale_date", format(dateRange.to, 'yyyy-MM-dd'))
+          .lte("sale_date", format(dateRange.to, 'yyyy-MM-dd')),
+        supabase.from("sales")
+          .select("*")
+          .gte("sale_date", format(threeYearsAgo, 'yyyy-MM-dd'))
+          .lte("sale_date", format(today, 'yyyy-MM-dd'))
       ]);
 
       if (empRes.error) throw empRes.error;
       if (salesRes.error) throw salesRes.error;
+      if (generalSalesRes.error) throw generalSalesRes.error;
 
-      const employeesWithSales = (empRes.data || []).map(emp => {
+      const allEmployees = empRes.data || [];
+
+      // Calculate current period ranking
+      const employeesWithSales = allEmployees.map(emp => {
         const empSales = (salesRes.data || [])
           .filter(sale => sale.employee_id === emp.id)
           .reduce((sum, sale) => sum + Number(sale.amount), 0);
@@ -111,7 +122,20 @@ function Dashboard() {
         };
       }).sort((a, b) => b.sales_value - a.sales_value);
 
+      // Calculate general ranking (3 years)
+      const generalRanking = allEmployees.map(emp => {
+        const empSales = (generalSalesRes.data || [])
+          .filter(sale => sale.employee_id === emp.id)
+          .reduce((sum, sale) => sum + Number(sale.amount), 0);
+        
+        return {
+          ...emp,
+          sales_value: empSales
+        };
+      }).sort((a, b) => b.sales_value - a.sales_value);
+
       setEmployees(employeesWithSales);
+      setGeneralEmployees(generalRanking);
     } catch (error: any) {
       console.error("Erro ao buscar dados:", error);
       toast.error("Erro ao carregar dados: " + (error.message || "Verifique sua conexão"));
