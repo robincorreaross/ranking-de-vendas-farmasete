@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Auth } from "@/components/Auth";
-import { EmployeeForm } from "@/components/sales/EmployeeForm";
+
 import { RankingTable } from "@/components/sales/RankingTable";
 import { RankingCharts } from "@/components/sales/RankingCharts";
 import { MetricCards } from "@/components/sales/MetricCards";
