@@ -63,7 +63,7 @@ export function RankingCharts({ employees, displayUnit, totalSales }: RankingCha
           </div>
           <div className="h-[350px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={employees.map(emp => ({ 
+              <BarChart data={employees.filter(emp => emp.sales_value > 0).map(emp => ({ 
                 name: emp.name, 
                 value: displayUnit === "PERCENT" ? (totalSales > 0 ? (emp.sales_value / totalSales) * 100 : 0) : emp.sales_value,
                 originalValue: emp.sales_value 
