@@ -120,7 +120,7 @@ function Dashboard() {
           ...emp,
           sales_value: empSales
         };
-      }).sort((a, b) => b.sales_value - a.sales_value);
+      }).filter(emp => emp.sales_value > 0).sort((a, b) => b.sales_value - a.sales_value);
 
       // Calculate general ranking (3 years)
       const generalRanking = allEmployees.map(emp => {
@@ -132,7 +132,7 @@ function Dashboard() {
           ...emp,
           sales_value: empSales
         };
-      }).sort((a, b) => b.sales_value - a.sales_value);
+      }).filter(emp => emp.sales_value > 0).sort((a, b) => b.sales_value - a.sales_value);
 
       setEmployees(employeesWithSales);
       setGeneralEmployees(generalRanking);
