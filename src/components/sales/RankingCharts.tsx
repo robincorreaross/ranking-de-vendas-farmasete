@@ -39,7 +39,7 @@ export function RankingCharts({ employees, displayUnit, totalSales }: RankingCha
           <p className="text-blue-400 text-sm">
             {displayUnit === "BRL" 
               ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(payload[0].value)
-              : `${payload[0].value.toFixed(1)}%`}
+              : `${new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(payload[0].value)}%`}
           </p>
           {displayUnit === "PERCENT" && (
             <p className="text-slate-400 text-xs">
@@ -89,7 +89,7 @@ export function RankingCharts({ employees, displayUnit, totalSales }: RankingCha
                   stroke="#475569" 
                   fontSize={10} 
                   fontWeight="bold"
-                  tickFormatter={(val) => displayUnit === "PERCENT" ? `${val}%` : `R$ ${val >= 1000 ? (val/1000).toFixed(0) + 'k' : val}`}
+                  tickFormatter={(val) => displayUnit === "PERCENT" ? `${new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val)}%` : `R$ ${val >= 1000 ? (val/1000).toFixed(0) + 'k' : val}`}
                 />
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
                 <Bar 

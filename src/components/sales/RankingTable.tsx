@@ -23,7 +23,10 @@ export function RankingTable({ employees, onUpdate, displayUnit, totalSales, sho
     if (!showValues && displayUnit === "BRL") return "••••••";
     if (displayUnit === "PERCENT") {
       const percent = totalSales > 0 ? (value / totalSales) * 100 : 0;
-      return `${percent.toFixed(1)}%`;
+      return new Intl.NumberFormat("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(percent) + "%";
     }
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -67,13 +70,13 @@ export function RankingTable({ employees, onUpdate, displayUnit, totalSales, sho
                     ) : (
                       <TrendingDown className="h-3 w-3 text-rose-500" />
                     )}
-                    <span>{showValues ? `${((employee.sales_value / (totalSales || 1)) * 100).toFixed(1)}% do total` : "••%"}</span>
+                    <span>{showValues ? `${new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format((employee.sales_value / (totalSales || 1)) * 100)}% do total` : "••%"}</span>
                   </div>
                 </div>
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-1 text-[10px] text-slate-500">
-                  {((employee.sales_value / (totalSales || 1)) * 100).toFixed(1)}%
+                  {new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format((employee.sales_value / (totalSales || 1)) * 100)}%
                 </div>
               </TableCell>
             </TableRow>
