@@ -5,10 +5,9 @@ import { Auth } from "@/components/Auth";
 
 import { RankingTable } from "@/components/sales/RankingTable";
 import { RankingCharts } from "@/components/sales/RankingCharts";
-import { ChampionRankingTable } from "@/components/sales/ChampionRankingTable";
 import { MetricCards } from "@/components/sales/MetricCards";
 import { DateFilter, DateRange } from "@/components/sales/DateFilter";
-import { Eye, EyeOff, Trophy } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -26,8 +25,6 @@ function Dashboard() {
   const [session, setSession] = useState<any>(null);
   const [employees, setEmployees] = useState<any[]>([]);
   const [generalEmployees, setGeneralEmployees] = useState<any[]>([]);
-  const [championRanking, setChampionRanking] = useState<any[]>([]);
-
   const [loading, setLoading] = useState(true);
   const [displayUnit, setDisplayUnit] = useState<"BRL" | "PERCENT">("PERCENT");
   const [showValues, setShowValues] = useState(false);
@@ -95,7 +92,7 @@ function Dashboard() {
       const threeYearsAgo = subYears(new Date(), 3);
       const today = new Date();
 
-      const [empRes, salesRes, generalSalesRes, championsRes] = await Promise.all([
+      const [empRes, salesRes, generalSalesRes] = await Promise.all([
         supabase.from("employees").select("*").order("name"),
         supabase.from("sales")
           .select("*")
@@ -104,22 +101,18 @@ function Dashboard() {
         supabase.from("sales")
           .select("*")
           .gte("sale_date", format(threeYearsAgo, 'yyyy-MM-dd'))
-          .lte("sale_date", format(today, 'yyyy-MM-dd')),
-        supabase.rpc("get_champion_ranking", { lookback_years: 3 })
+          .lte("sale_date", format(today, 'yyyy-MM-dd'))
       ]);
 
       if (empRes.error) throw empRes.error;
       if (salesRes.error) throw salesRes.error;
       if (generalSalesRes.error) throw generalSalesRes.error;
-      if (championsRes.error) throw championsRes.error;
 
       const allEmployees = empRes.data || [];
-      const salesData = salesRes.data || [];
-      const generalSalesData = generalSalesRes.data || [];
 
       // Calculate current period ranking
       const employeesWithSales = allEmployees.map(emp => {
-        const empSales = salesData
+        const empSales = (salesRes.data || [])
           .filter(sale => sale.employee_id === emp.id)
           .reduce((sum, sale) => sum + Number(sale.amount), 0);
         
@@ -131,7 +124,7 @@ function Dashboard() {
 
       // Calculate general ranking (3 years)
       const generalRanking = allEmployees.map(emp => {
-        const empSales = generalSalesData
+        const empSales = (generalSalesRes.data || [])
           .filter(sale => sale.employee_id === emp.id)
           .reduce((sum, sale) => sum + Number(sale.amount), 0);
         
@@ -141,16 +134,8 @@ function Dashboard() {
         };
       }).filter(emp => emp.sales_value > 0).sort((a, b) => b.sales_value - a.sales_value);
 
-      // Champions data is now fetched directly from the database function for better performance and accuracy
-      const champions = championsRes.data || [];
-
       setEmployees(employeesWithSales);
       setGeneralEmployees(generalRanking);
-      setChampionRanking(champions);
-
-      setEmployees(employeesWithSales);
-      setGeneralEmployees(generalRanking);
-      setChampionRanking(champions);
     } catch (error: any) {
       console.error("Erro ao buscar dados:", error);
       toast.error("Erro ao carregar dados: " + (error.message || "Verifique sua conexão"));
@@ -243,9 +228,6 @@ function Dashboard() {
             <TabsTrigger value="overview" className="rounded-lg px-6 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 transition-all">
               <BarChart3 className="h-4 w-4 mr-2" /> Gráfico de Performance
             </TabsTrigger>
-            <TabsTrigger value="champions" className="rounded-lg px-6 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 transition-all">
-              <Trophy className="h-4 w-4 mr-2" /> Campeões de Vendas
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="table" className="outline-none focus-visible:ring-0">
@@ -294,22 +276,6 @@ function Dashboard() {
 
           <TabsContent value="overview" className="space-y-6 outline-none focus-visible:ring-0">
             <RankingCharts employees={employees} displayUnit={displayUnit} totalSales={totalSales} />
-          </TabsContent>
-
-          <TabsContent value="champions" className="outline-none focus-visible:ring-0">
-            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm shadow-xl">
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h3 className="text-xl font-bold text-white">Campeões de Vendas (Últimos 3 Anos)</h3>
-                  <p className="text-slate-500 text-sm mt-1">Ranking por número de vezes como "Melhor do Dia"</p>
-                </div>
-                <div className="text-right">
-                  <span className="text-2xl font-black text-yellow-500">{championRanking.length}</span>
-                  <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Vencedores Registrados</p>
-                </div>
-              </div>
-              <ChampionRankingTable data={championRanking} />
-            </div>
           </TabsContent>
         </Tabs>
       </div>
