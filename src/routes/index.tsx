@@ -105,6 +105,8 @@ function Dashboard() {
           .select("*")
           .gte("sale_date", format(threeYearsAgo, 'yyyy-MM-dd'))
           .lte("sale_date", format(today, 'yyyy-MM-dd'))
+          .order('sale_date', { ascending: false })
+          .limit(10000) // Aumentando o limite para garantir que pegamos todo o histórico em bases grandes
       ]);
 
       if (empRes.error) throw empRes.error;
