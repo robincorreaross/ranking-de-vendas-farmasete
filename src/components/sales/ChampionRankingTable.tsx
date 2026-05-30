@@ -53,12 +53,7 @@ export function ChampionRankingTable({ data }: ChampionRankingTableProps) {
                 </div>
               </TableCell>
               <TableCell className="font-bold text-slate-200">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-blue-600/20 flex items-center justify-center text-blue-400 text-xs border border-blue-500/20">
-                    {item.name.substring(0, 2).toUpperCase()}
-                  </div>
-                  {item.name}
-                </div>
+                {item.name}
               </TableCell>
               <TableCell className="text-right">
                 <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
