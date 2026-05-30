@@ -87,6 +87,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_champion_ranking: {
+        Args: { lookback_years?: number }
+        Returns: {
+          id: string
+          name: string
+          wins: number
+        }[]
+      }
       get_sales_ranking: {
         Args: { end_date: string; start_date: string }
         Returns: {

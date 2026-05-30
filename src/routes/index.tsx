@@ -95,7 +95,7 @@ function Dashboard() {
       const threeYearsAgo = subYears(new Date(), 3);
       const today = new Date();
 
-      const [empRes, salesRes, generalSalesRes] = await Promise.all([
+      const [empRes, salesRes, generalSalesRes, championsRes] = await Promise.all([
         supabase.from("employees").select("*").order("name"),
         supabase.from("sales")
           .select("*")
@@ -104,14 +104,14 @@ function Dashboard() {
         supabase.from("sales")
           .select("*")
           .gte("sale_date", format(threeYearsAgo, 'yyyy-MM-dd'))
-          .lte("sale_date", format(today, 'yyyy-MM-dd'))
-          .order('sale_date', { ascending: false })
-          .limit(10000) // Aumentando o limite para garantir que pegamos todo o histórico em bases grandes
+          .lte("sale_date", format(today, 'yyyy-MM-dd')),
+        supabase.rpc("get_champion_ranking", { lookback_years: 3 })
       ]);
 
       if (empRes.error) throw empRes.error;
       if (salesRes.error) throw salesRes.error;
       if (generalSalesRes.error) throw generalSalesRes.error;
+      if (championsRes.error) throw championsRes.error;
 
       const allEmployees = empRes.data || [];
       const salesData = salesRes.data || [];
@@ -141,39 +141,12 @@ function Dashboard() {
         };
       }).filter(emp => emp.sales_value > 0).sort((a, b) => b.sales_value - a.sales_value);
 
-      // Calculate Champions (winners of the day)
-      // Group general sales by date
-      const salesByDate: { [date: string]: { [empId: string]: number } } = {};
-      generalSalesData.forEach(sale => {
-        const date = sale.sale_date;
-        if (!salesByDate[date]) salesByDate[date] = {};
-        if (!salesByDate[date][sale.employee_id]) salesByDate[date][sale.employee_id] = 0;
-        salesByDate[date][sale.employee_id] += Number(sale.amount);
-      });
+      // Champions data is now fetched directly from the database function for better performance and accuracy
+      const champions = championsRes.data || [];
 
-      // Count wins per employee
-      const winsCount: { [empId: string]: number } = {};
-      Object.keys(salesByDate).forEach(date => {
-        const dailySales = salesByDate[date];
-        let winnerId = null;
-        let maxAmount = -1;
-
-        Object.keys(dailySales).forEach(empId => {
-          if (dailySales[empId] > maxAmount) {
-            maxAmount = dailySales[empId];
-            winnerId = empId;
-          }
-        });
-
-        if (winnerId && maxAmount > 0) {
-          winsCount[winnerId] = (winsCount[winnerId] || 0) + 1;
-        }
-      });
-
-      const champions = allEmployees.map(emp => ({
-        ...emp,
-        wins: winsCount[emp.id] || 0
-      })).filter(emp => emp.wins > 0).sort((a, b) => b.wins - a.wins);
+      setEmployees(employeesWithSales);
+      setGeneralEmployees(generalRanking);
+      setChampionRanking(champions);
 
       setEmployees(employeesWithSales);
       setGeneralEmployees(generalRanking);
